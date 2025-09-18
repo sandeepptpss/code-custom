@@ -1,0 +1,241 @@
+<div class="demo-timer-container"  id="Customtimer">
+</div>
+<script>
+$(document).ready(function(){
+  var countDownDate = new Date({{ product.metafields.custom.countdown_timer_date }}).getTime();  
+  var timeSet = setInterval(function(){
+  var now = new Date().getTime();
+  var distance = countDownDate - now;
+  var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+  if((days+"").length === 1){
+  days = "0"+days;
+  }
+  if((minutes+"").length === 1){
+  minutes = "0"+minutes;
+  }
+  if((hours+"").length === 1){
+  hours = "0"+hours;
+  }
+  if((seconds+"").length === 1){
+  seconds = "0"+seconds;
+  }
+document.getElementById("Customtimer").innerHTML =
+`<h4 class="time-remaining-title">TIME REMAINING</h4>
+ <div class="demo-timer">
+          <div class="Customtimerss">
+            <p>
+              <span>${days}</span>
+              <span>:</span>
+            </p>
+            <span class="time-sec">Days</span>
+          </div>
+          <div>
+            <p>
+              <span>${hours}</span>
+              <span>:</span>
+            </p>
+            <span class="time-sec">Hours</span>
+          </div>
+          <div>
+            <p>
+              <span>${minutes}</span>
+              <span>:</span>
+            </p>
+            <span class="time-sec">Minutes</span>
+          </div>
+          <div>
+            <p>
+              <span class="seconds">${seconds}</span>
+              <span></span>
+            </p>
+            <span class="time-sec">Seconds</span>
+          </div>
+        </div>`
+  if(distance < 0){
+    clearInterval(timeSet);
+    document.getElementById("Customtimer").innerHTML = `<div class="demo-timer-container" id="Customtimer"><h4 class="time-remaining-title">EXPIRED</h4>
+ <div class="demo-timer">
+          <div class="Customtimerss" custom_time="07">
+            <p>
+              <span>00</span>
+              <span>:</span>
+            </p>
+            <span class="time-sec">Days</span>
+          </div>
+          <div>
+            <p>
+              <span>00</span>
+              <span>:</span>
+            </p>
+            <span class="time-sec">Hours</span>
+          </div>
+          <div>
+            <p>
+              <span>00</span>
+              <span>:</span>
+            </p>
+            <span class="time-sec">Minutes</span>
+          </div>
+          <div>
+            <p>
+              <span class="seconds">00</span>
+              <span></span>
+            </p>
+            <span class="time-sec">Seconds</span>
+          </div>
+        </div></div>`;
+  }
+},100);
+});
+</script>  
+<style>
+.demo-timer-container{
+  padding: 10px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+.demo-timer-container h4{
+  margin: 0px ;
+  margin-bottom: 3px;
+  letter-spacing: 1px;
+  font-size: 10px;
+  color: #fff;
+}
+.demo-timer{
+  display: flex;
+  align-items: center;
+}
+.demo-timer > p{
+  padding-right: 5px;
+}
+.demo-timer p{
+  color: #fff;
+  display: flex;
+  align-items: center;
+  margin: 0px;
+  margin: 0;
+}
+.demo-timer p > span:first-child{
+  font-size: 26px;
+  background-color: #6d412a;
+  padding: 10px;
+  flex: 0 0 60%;
+  line-height:15px;
+  color: #fff !important;
+  box-shadow: rgb(0 0 0 / 20%) 0px 12px 28px 0px, rgb(0 0 0 / 10%) 0px 2px 4px 0px, rgb(255 255 255 / 5%) 0px 0px 0px 1px inset;
+}
+.demo-timer p > span:last-child{
+  font-size: 11px;
+  font-weight:600;
+  padding: 0 5px;
+  color: #6d412a !important;
+}
+.demo-timer .seconds{
+   font-weight:500;
+}
+.demo-timer .time-sec{
+  font-size: 9px;
+  font-weight: 500;
+  display: flex;
+  justify-content: center;
+  color: #6d412a;
+  text-transform: uppercase;
+  display: inherit;
+  padding-left: 4px;
+  margin-top: 3px;
+  width:75%;
+  text-align:center;
+}
+.time-remaining-title{
+  color: #000 !important; 
+}
+@media only screen and (min-width: 768px) {
+.demo-timer .time-sec {
+    font-size: 14px;
+}
+.demo-timer p > span:first-child{
+      font-size:50px;
+      padding: 18px;
+}
+.demo-timer p > span:last-child{
+  font-size:13px;
+}
+}
+</style>
+
+
+{% comment %}
+<div class="demo-timer-container"  id="Customtimer">
+</div>
+<script>
+$(document).ready(function(){
+  var countDownDate = new Date({{ product.metafields.custom.countdown_timer_date }}).getTime();  
+  var timeSet = setInterval(function(){
+  var now = new Date().getTime();
+  var distance = countDownDate - now;
+  var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+  if((days+"").length === 1){
+  days = "0"+days;
+  }
+  if((minutes+"").length === 1){
+  minutes = "0"+minutes;
+  }
+  if((hours+"").length === 1){
+  hours = "0"+hours;
+  }
+  if((seconds+"").length === 1){
+  seconds = "0"+seconds;
+  }
+document.getElementById("Customtimer").innerHTML =
+`<h4 class="time-remaining-title">TIME REMAINING</h4>
+ <div class="demo-timer">
+          <div class="Customtimerss" custom_time="${days}">
+            <p>
+              <span>${days}</span>
+              <span>:</span>
+            </p>
+            <span class="time-sec">Days</span>
+          </div>
+          <div>
+            <p>
+              <span>${hours}</span>
+              <span>:</span>
+            </p>
+            <span class="time-sec">Hours</span>
+          </div>
+          <div>
+            <p>
+              <span>${minutes}</span>
+              <span>:</span>
+            </p>
+            <span class="time-sec">Minutes</span>
+          </div>
+          <div>
+            <p>
+              <span class="seconds">${seconds}</span>
+              <span></span>
+            </p>
+            <span class="time-sec">Seconds</span>
+          </div>
+        </div>`
+    
+if(distance < 0) {
+    clearInterval(timeSet);
+    document.getElementById("Customtimer").innerHTML = "EXPIRED";
+  }
+},100);
+});
+</script>  
+{% endcomment %}
+
+
+
