@@ -1,0 +1,284 @@
+{{ 'fbt-pdp-section.css' | asset_url | stylesheet_tag }}
+{{ 'flexible-products-section.css' | asset_url | stylesheet_tag }}
+
+{% assign upsell_products = product.metafields.custom.custom_upsell.value %}
+{% if upsell_products == blank %}
+  {% assign upsell_products = section.settings.bestsellers %}
+{% endif %}
+
+{% unless upsell_products == blank %}
+<div class="fbt-pdp-section">
+  <div class="padding-global">
+    <div class="container-large">
+      <h2 class="fbt-pdp-heading">{{ section.settings.heading }}</h2>
+      <div class="fbt-row-wrapper">
+        <div class="fbtpdp-products-wrapper">
+          {% assign upsell_count = 0 %}
+          {% for upsell_product in upsell_products %}
+            {% if upsell_product and upsell_product != product %}
+              <div class="fpp-product" data-price="{{ upsell_product.price }}">
+                <a class="fpp-link-wrapp" href="{{ upsell_product.url }}">
+                  {% if upsell_product.featured_image %}
+                    <img
+                      class="fpp-image"
+                      src="{{ upsell_product.featured_image | img_url: '800x' }}"
+                      width="380px"
+                      height="305px"
+                      alt="{{ upsell_product.title }}"
+                    >
+                  {% endif %}
+                  
+                  <p class="fpp-product-name">{{ upsell_product.title }}</p>
+                  {% if upsell_product.compare_at_price and upsell_product.price < upsell_product.compare_at_price %}
+                    <div class="fpp-product-price">
+                      <p class="fpp-regular-product-price">{{ upsell_product.price | money }}</p>
+                      <p class="fpp-compare-product-price">{{ upsell_product.compare_at_price | money }}</p>
+                    </div>
+                  {% else %}
+                    <div class="fpp-product-price">
+                      <p class="fpp-regular-product-price">{{ upsell_product.price | money }}</p>
+                    </div>
+                  {% endif %}
+                </a>
+                
+                <div class="bulk-add-checkbox">
+                  <input
+                    type="checkbox"
+                    class="upsell-product-checkbox"
+                    name="upsell_product"
+                    value="{{ upsell_product.selected_or_first_available_variant.id }}"
+                    id="checkbox-{{ upsell_product.id }}"
+                  >
+                  <label for="checkbox-{{ upsell_product.id }}">Select</label>
+                </div>
+              </div>
+              
+              {% assign upsell_count = upsell_count | plus: 1 %}
+              {% if upsell_count == 4 %}
+                {% break %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </div>
+        <div class="fbt-subtotal-wrapper">
+          <p class="fbt-subtotal"></p>
+          <div class="bulk-add-container" style="margin-top: 20px;">
+            <button id="bulk-add-button" type="button">
+              Add to cart
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endunless %}
+
+
+<script>
+  function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  }
+  
+  function parsePrice(priceString) {
+    const numericString = priceString.replace(/[^0-9.]/g, '');
+    return parseFloat(numericString) || 0;
+  }
+  
+  function calculateSubtotal() {
+    let subtotal = 0;
+    
+    const productContainers = document.querySelectorAll('.fpp-product');
+    
+    productContainers.forEach(container => {
+      const checkbox = container.querySelector('.upsell-product-checkbox');
+      if (checkbox && checkbox.checked) {
+        const priceElement = container.querySelector('.fpp-regular-product-price');
+        if (priceElement) {
+          const priceText = priceElement.textContent.trim();
+          const price = parsePrice(priceText);
+          subtotal += price;
+        }
+      }
+    });
+    
+    const subtotalElement = document.querySelector('.fbt-subtotal');
+    if (subtotalElement) {
+      subtotalElement.textContent = 'Subtotal: ' + formatCurrency(subtotal);
+    }
+  }
+  
+  function attachCheckboxListeners() {
+    const checkboxes = document.querySelectorAll('.upsell-product-checkbox');
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', calculateSubtotal);
+    });
+  }
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    attachCheckboxListeners();
+    calculateSubtotal();
+  });
+</script>
+
+
+<script>
+  function updateCartDrawer() {
+    const cartUrl = (typeof routes !== 'undefined' && routes.cart_url) ? routes.cart_url : '/cart';
+    return fetch(`${cartUrl}?section_id=cart-drawer`)
+      .then(response => response.text())
+      .then(responseText => {
+        const parser = new DOMParser();
+        const htmlDoc = parser.parseFromString(responseText, 'text/html');
+
+        const selectors = ['cart-drawer-items', '.drawer__footer'];
+        selectors.forEach(selector => {
+          const newElement = htmlDoc.querySelector(selector);
+          const currentElement = document.querySelector(selector);
+          if (newElement && currentElement) {
+            currentElement.innerHTML = newElement.innerHTML;
+          }
+        });
+
+        const cartDrawer = document.querySelector('cart-drawer.drawer');
+        if (cartDrawer) {
+          cartDrawer.classList.remove('is-empty');
+          cartDrawer.classList.add('active');
+        }
+
+        const cartDrawerItems = document.querySelector('cart-drawer-items');
+        if (cartDrawerItems) {
+          cartDrawerItems.classList.remove('is-empty');
+        }
+
+        if (typeof $ !== 'undefined') {
+          $('.drawer__inner-empty').remove();
+        }
+      })
+      .catch(e => console.error('Error updating cart drawer:', e));
+  }
+
+  function updateCartIcon() {
+    fetch('/cart.js')
+      .then(response => response.json())
+      .then(cart => {
+        const cartUrl = (typeof routes !== 'undefined' && routes.cart_url) ? routes.cart_url : '/cart';
+        fetch(`${cartUrl}?section_id=cart-icon-bubble`)
+          .then(resp => resp.text())
+          .then(iconResponse => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(iconResponse, "text/html");
+            const newCartIcon = htmlDoc.querySelector('#cart-icon-bubble');
+            if (newCartIcon) {
+              const currentCartIcon = document.getElementById('cart-icon-bubble');
+              if (currentCartIcon) {
+                currentCartIcon.replaceWith(newCartIcon);
+                return;
+              }
+            }
+            const cartIconBubble = document.getElementById('cart-icon-bubble');
+            if (cartIconBubble) {
+              cartIconBubble.innerHTML = `
+               <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M3.51996 17.9992C4.0052 14.5055 4.24781 12.7587 5.08638 11.4442C5.82533 10.2858 6.88268 9.36519 8.13167 8.79262C8.74612 8.51094 9.42565 8.35137 10.2857 8.26097C11.4096 8.14286 12.8418 8.14286 14.8399 8.14286H17.1601C19.1583 8.14286 20.5904 8.14286 21.7143 8.26097C22.5744 8.35137 23.2539 8.51094 23.8684 8.79262C25.1174 9.36519 26.1747 10.2858 26.9136 11.4442C27.7522 12.7587 27.9948 14.5055 28.4801 17.9992C29.1032 22.4856 29.4147 24.7288 28.7297 26.471C28.1283 28.0004 27.0179 29.2757 25.5857 30.0818C23.9543 31 21.6896 31 17.1601 31H14.8399C10.3105 31 8.04574 31 6.41435 30.0818C4.98216 29.2757 3.87174 28.0004 3.27035 26.471C2.58531 24.7288 2.89686 22.4856 3.51996 17.9992Z" fill="#775ACC"></path>
+<path d="M21.7143 13.8571V8.26097M10.2857 13.8571V8.26097M10.2857 8.26097V6.71429C10.2857 3.55837 12.8441 1 16 1C19.1559 1 21.7143 3.55837 21.7143 6.71429V8.26097M10.2857 8.26097C11.4096 8.14286 12.8418 8.14286 14.8399 8.14286H17.1601C19.1583 8.14286 20.5904 8.14286 21.7143 8.26097M10.2857 8.26097C9.42565 8.35137 8.74612 8.51094 8.13167 8.79262C6.88268 9.36519 5.82533 10.2858 5.08638 11.4442C4.24781 12.7587 4.0052 14.5055 3.51996 17.9992C2.89686 22.4856 2.58531 24.7288 3.27035 26.471C3.87174 28.0004 4.98216 29.2757 6.41435 30.0818C8.04574 31 10.3105 31 14.8399 31H17.1601C21.6896 31 23.9543 31 25.5857 30.0818C27.0179 29.2757 28.1283 28.0004 28.7297 26.471C29.4147 24.7288 29.1032 22.4856 28.4801 17.9992C27.9948 14.5055 27.7522 12.7587 26.9136 11.4442C26.1747 10.2858 25.1174 9.36519 23.8684 8.79262C23.2539 8.51094 22.5744 8.35137 21.7143 8.26097" stroke="#775ACC" stroke-width="2" stroke-linecap="round"></path>
+</svg>
+<span class="visually-hidden">Cart</span>
+                <div class="cart-count-bubble">
+                  <span aria-hidden="true">${cart.item_count}</span>
+                  <span class="visually-hidden">${cart.item_count} ${cart.item_count === 1 ? 'item' : 'items'}</span>
+                </div>
+              `;
+              cartIconBubble.setAttribute('data-cart-count', cart.item_count);
+            }
+          })
+          .catch(err => {
+      
+          });
+      })
+      .catch(error => {
+
+      });
+  }
+
+  async function bulkAddToCart() {
+    const checkboxes = document.querySelectorAll('.upsell-product-checkbox:checked');
+    if (!checkboxes.length) {
+      return;
+    }
+    
+    try {
+      for (const checkbox of checkboxes) {
+        const payload = {
+          id: checkbox.value,
+          quantity: 1
+        };
+        const response = await fetch('/cart/add.js', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.description || 'Error adding item.');
+        }
+      }
+      
+      setTimeout(async () => {
+        await updateCartDrawer();
+  
+        if (window.theme && window.theme.cartDrawer && typeof window.theme.cartDrawer.open === 'function') {
+          window.theme.cartDrawer.open();
+        } else {
+          document.dispatchEvent(new Event('cart:refresh'));
+        }
+  
+        updateCartIcon();
+      }, 300);
+      
+    } catch (error) {
+    }
+  }
+  
+  document.getElementById('bulk-add-button').addEventListener('click', bulkAddToCart);
+</script>
+
+
+{% schema %}
+  {
+    "name": "FBT PDP",
+    "settings": [
+      {
+        "type": "text",
+        "id": "padding_top",
+        "label": "Padding Top",
+        "default": "120"
+      },
+      {
+        "type": "text",
+        "id": "padding_bottom",
+        "label": "Padding Bottom",
+        "default": "120"
+      },
+      {
+        "type": "text",
+        "id": "heading",
+        "label": "Heading",
+        "default": "Frequently Bought Together"
+      },
+      {
+        "type": "product_list",
+        "id": "bestsellers",
+        "label": "Select Bestseller Products",
+        "limit": 5
+      }
+    ],
+    "presets": [
+      {
+        "name": "FBT PDP"
+      }
+    ]
+  }
+  {% endschema %}  
