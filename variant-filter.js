@@ -55,3 +55,43 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 </script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const path = window.location.pathname;
+  const productCards = document.querySelectorAll(".product-card"); // adjust selector if needed
+
+  if (path.includes("/collections/rose-gold")) {
+    productCards.forEach((card, index) => {
+      const swatches = card.querySelectorAll("[js-product-card='swatch']");
+      if (!swatches.length) return;
+
+      const roseGoldSwatch = Array.from(swatches).find(btn => {
+        const value = btn.dataset.valueName || btn.textContent || "";
+        return value.toLowerCase().includes("rose gold");
+      });
+
+      if (roseGoldSwatch) {
+        roseGoldSwatch.click();
+        console.log(`Card ${index}: Rose Gold swatch clicked`);
+      }
+    });
+  } else if (path.includes("/collections/silver-collection")) {
+    productCards.forEach((card, index) => {
+      const swatches = card.querySelectorAll("[js-product-card='swatch']");
+      if (!swatches.length) return;
+
+      const silverSwatch = Array.from(swatches).find(btn => {
+        const value = btn.dataset.valueName || btn.textContent || "";
+        return value.toLowerCase().includes("silver");
+      });
+
+      if (silverSwatch) {
+        silverSwatch.click();
+        console.log(`Card ${index}: Silver swatch clicked`);
+      }
+    });
+  }
+});
+</script>
