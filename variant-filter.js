@@ -1,3 +1,30 @@
+{% if collection.metafields.custom.collection_variant_color %}
+  {% assign metaobject = collection.metafields.custom.collection_variant_color.value %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  console.log("Silver swatch script loaded");
+  if (window.location.pathname.includes("/collections/{{collection.handle}}")) {
+    const productCards = document.querySelectorAll("product-card");
+    productCards.forEach((card, index) => {
+      const swatches = card.querySelectorAll("[js-product-card='swatch']");
+      if (!swatches.length) return;
+      const silverSwatch = Array.from(swatches).find(btn => {
+        const value = btn.dataset.valueName || btn.textContent || "";
+        return value.toLowerCase().includes("{{ metaobject.collection_variant_color | downcase }}");
+      });
+      if (silverSwatch) {
+        silverSwatch.click();
+        console.log(`Card ${index} silver swatch clicked`);
+      }
+    });
+  } else {
+    console.log("Not on necklaces collection page");
+  }
+});
+</script>
+
+
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const path = window.location.pathname.toLowerCase(); // full path
