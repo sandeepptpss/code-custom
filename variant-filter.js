@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .map(v => v.trim());
 
     productCards.forEach((card, index) => {
-      const swatches = card.querySelectorAll("[js-product-card='swatch']");
+      const swatches = card.querySelectorAll(".custom-variant-filter");
       if (!swatches.length) return;
 
       // Find the first swatch that matches ANY of the metafield values
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (window.location.pathname.includes("/collections/{{collection.handle}}")) {
     const productCards = document.querySelectorAll("product-card");
     productCards.forEach((card, index) => {
-      const swatches = card.querySelectorAll("[js-product-card='swatch']");
+      const swatches = card.querySelectorAll(".custom-variant-filter");
       if (!swatches.length) return;
       const silverSwatch = Array.from(swatches).find(btn => {
         const value = btn.dataset.valueName || btn.textContent || "";
@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const productCards = document.querySelectorAll("product-card");
     productCards.forEach((card, index) => {
-      const swatches = card.querySelectorAll("[js-product-card='swatch']");
+      const swatches = card.querySelectorAll(".custom-variant-filter");
       if (!swatches.length) return;
 
       // Find swatch that matches the tag name
