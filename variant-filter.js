@@ -1,3 +1,37 @@
+// final code filter
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  console.log("Swatch auto-select script loaded");
+
+  if (window.location.pathname.includes("/collections/{{ collection.handle }}")) {
+    const productCards = document.querySelectorAll("product-card");
+    const metafieldValues = "{{ collection.metafields.custom.collection_variant_color | downcase }}"
+      .split(",")
+      .map(v => v.trim());
+
+    productCards.forEach((card, index) => {
+      const swatches = card.querySelectorAll("[js-product-card='swatch']");
+      if (!swatches.length) return;
+
+      // Find the first swatch that matches ANY of the metafield values
+      const matchSwatch = Array.from(swatches).find(btn => {
+        const value = (btn.dataset.valueName || btn.textContent || "").toLowerCase().trim();
+        return metafieldValues.some(metaVal => value.includes(metaVal));
+      });
+
+      if (matchSwatch) {
+        matchSwatch.click();
+        console.log(`Card ${index}: "${matchSwatch.textContent.trim()}" swatch clicked`);
+      }
+    });
+  } else {
+    console.log("Not on {{ collection.handle }} collection page");
+  }
+});
+</script>
+
+
+
 {% if collection.metafields.custom.collection_variant_color %}
   {% assign metaobject = collection.metafields.custom.collection_variant_color.value %}
 <script>
