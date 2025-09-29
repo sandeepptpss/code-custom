@@ -1,3 +1,59 @@
+pre final 
+     {% if collection.metafields.custom.collection_variant_color != blank %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const collectionHandle = "{{ collection.handle }}";
+  const metafieldValues = '{{ collection.metafields.custom.collection_variant_color | downcase }}'
+    .split(',')
+    .map(v => v.trim());
+
+  const applySwatchSelection = (context = document) => {
+    const productCards = context.querySelectorAll("product-card");
+    productCards.forEach((card) => {
+      const swatches = card.querySelectorAll(".custom-variant-filter");
+      if (!swatches.length) return;
+
+      const matchSwatch = Array.from(swatches).find((btn) => {
+        const value = (btn.dataset.valueName || btn.textContent || "")
+          .toLowerCase()
+          .trim();
+        return metafieldValues.some((metaVal) => value.includes(metaVal));
+      });
+
+      if (matchSwatch) {
+        matchSwatch.click();
+        card.closest('.custom-product-card')?.classList.remove("not-match");
+      } else {
+        card.closest('.custom-product-card')?.classList.add("not-match");
+      }
+    });
+  }
+  const path = window.location.pathname;  
+  const search = window.location.search;
+  
+  const isValidCollectionPage =
+    path === `/collections/${collectionHandle}` && search === "" ||  
+    path === `/collections/${collectionHandle}` && search.startsWith("?page="); 
+
+  if (isValidCollectionPage) {
+    applySwatchSelection();
+
+    document.addEventListener("shopify:section:load", applySwatchSelection);
+    const loadMoreBtn = document.querySelector('.button--loader[js-product-listing="loadMore"]');
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener("click", function () {
+        setTimeout(() => {
+          applySwatchSelection();
+        }, 1500);
+      });
+    }
+  }
+});
+</script>
+{% endif %}
+  
+
+
 // final code filter
 <script>
 document.addEventListener("DOMContentLoaded", function () {
