@@ -212,3 +212,61 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 </script>
+
+
+
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+  const collectionHandle = "{{ collection.handle }}"; // e.g., "rose-gold"
+  const metafieldValues = '{{ collection.metafields.custom.collection_variant_color | downcase }}'
+    .split(',')
+    .map(v => v.trim());
+
+  const applySwatchSelection = (context = document) => {
+    const productCards = context.querySelectorAll("product-card");
+    productCards.forEach((card) => {
+      const swatches = card.querySelectorAll(".custom-variant-filter");
+      if (!swatches.length) return;
+
+      const matchSwatch = Array.from(swatches).find((btn) => {
+        const value = (btn.dataset.valueName || btn.textContent || "")
+          .toLowerCase()
+          .trim();
+        return metafieldValues.some((metaVal) => value.includes(metaVal));
+      });
+
+      if (matchSwatch) {
+        matchSwatch.click();
+        card.closest('.custom-product-card')?.classList.remove("not-match");
+      } else {
+        card.closest('.custom-product-card')?.classList.add("not-match");
+      }
+    });
+  }
+
+  // Only run on main collection page or paginated pages
+  const path = window.location.pathname;  // e.g., "/collections/rose-gold"
+  const search = window.location.search;  // e.g., "?page=2"
+  
+  const isValidCollectionPage =
+    path === `/collections/${collectionHandle}` && search === "" ||  // main page
+    path === `/collections/${collectionHandle}` && search.startsWith("?page="); // paginated pages
+
+  if (isValidCollectionPage) {
+    applySwatchSelection();
+
+    // Shopify section reloads
+    document.addEventListener("shopify:section:load", applySwatchSelection);
+
+    // Load more button
+    const loadMoreBtn = document.querySelector('.button--loader[js-product-listing="loadMore"]');
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener("click", function () {
+        setTimeout(() => {
+          applySwatchSelection();
+        }, 1500); // adjust if needed
+      });
+    }
+  }
+});
+</script>
